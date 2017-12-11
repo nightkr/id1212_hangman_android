@@ -1,3 +1,5 @@
+import android.SdkLayout
+
 scalaVersion in ThisBuild := "2.11.12"
 
 lazy val sharedSettings = Seq(
@@ -22,12 +24,16 @@ instrumentTestRunner :=
   "android.support.test.runner.AndroidJUnitRunner"
 
 platformTarget := "android-27"
+minSdkVersion := "21"
 
-libraryDependencies ++=
-  "com.android.support" % "appcompat-v7" % "24.0.0" ::
-  "com.android.support.test" % "runner" % "0.5" % "androidTest" ::
-  "com.android.support.test.espresso" % "espresso-core" % "2.2.2" % "androidTest" ::
-  Nil
+libraryDependencies ++= Seq(
+  "com.android.support" % "appcompat-v7" % "25.3.1",
+  aar("com.android.support.constraint" % "constraint-layout" % "1.0.2"),
+  "com.android.support.test" % "runner" % "0.5" % "androidTest",
+  "com.android.support.test.espresso" % "espresso-core" % "2.2.2" % "androidTest"
+)
+
+resolvers += "constraint library" at (file(sdkPath.value) / "extras" / "m2repository").toURI.toString
 
 lazy val proto = project.settings(sharedSettings: _*)
 lazy val clientShared = project.settings(sharedSettings: _*).dependsOn(proto)
