@@ -28,13 +28,14 @@ minSdkVersion := "21"
 
 libraryDependencies ++= Seq(
   "com.android.support" % "appcompat-v7" % "25.3.1",
-  aar("com.android.support.constraint" % "constraint-layout" % "1.0.2"),
+  aar("com.android.support.constraint" % "constraint-layout" % "1.1.0-beta3"),
   "com.sdsmdg.harjot" % "vectormaster" % "1.1.1",
+  "io.taig.android" %% "toolbelt" % "0.4.9",
   "com.android.support.test" % "runner" % "0.5" % "androidTest",
   "com.android.support.test.espresso" % "espresso-core" % "2.2.2" % "androidTest"
 )
 
-resolvers += "constraint library" at (file(sdkPath.value) / "extras" / "m2repository").toURI.toString
+resolvers += "google support libraries" at "https://maven.google.com/"
 resolvers += Resolver.jcenterRepo
 
 lazy val proto = project.settings(sharedSettings: _*)

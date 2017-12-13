@@ -7,4 +7,8 @@
     <string name="won_lbl">You are a WINRAR</string>
     <string name="lost_lbl">You have lost :(</string>
     <string name="new_game">New Game</string>
+    <string name="ip_lbl">IP Address:</string>
+    <string name="port_lbl">Port:</string>
+    <string name="connect">Connect</string>
+    <string name="connect_failed">Failed to connect :(</string>
 </resources>
