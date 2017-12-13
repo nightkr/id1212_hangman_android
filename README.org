@@ -1,0 +1,10 @@
+* Usage
+
+To start the android app, run ~./sbt android:run~. Note, however, that this will
+/not/ start an emulator for you, you need to do that yourself (or connect a real
+device).
+
+Also, you need to have installed the Android SDK already, and ~$ANDROID_HOME~ *must*
+point at its location.
+
+This package does not contain the server, see [[https://github.com/teozkr/id1212_hangman][id1212_hangman]] for that.
