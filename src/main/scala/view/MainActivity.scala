@@ -51,7 +51,7 @@ class MainActivity extends Activity {
   object TryListener extends TextWatcher {
     override def afterTextChanged(e: Editable): Unit = {
       if (e.length() > 0) {
-        clientController.tryLetter(e.toString().charAt(0))
+        clientController.tryLetter(e.charAt(e.length() - 1))
         e.clear()
       }
     }
