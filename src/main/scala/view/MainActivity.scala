@@ -7,6 +7,7 @@ import android.graphics.drawable.Animatable
 import android.view.{KeyEvent, View}
 import android.widget.TextView
 import android.text.{TextWatcher, Editable}
+import com.sdsmdg.harjot.vectormaster.VectorMasterView
 import se.nullable.kth.id1212.hangman.client.controller.{ ClientController, UpdateListener }
 import se.nullable.kth.id1212.hangman.proto.Packet
 
@@ -20,6 +21,7 @@ class MainActivity extends Activity {
 
   private lazy val triesMsg = TR.string.tries_lbl.value
   private var triesLbl: TextView = _
+  private var triesImg: VectorMasterView = _
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -38,6 +40,7 @@ class MainActivity extends Activity {
     vh.try_input.addTextChangedListener(TryListener)
     clueLbl = vh.clue
     triesLbl = vh.tries_left
+    triesImg = vh.hangman_image
   }
 
   override def onDestroy(): Unit = {
@@ -66,6 +69,10 @@ class MainActivity extends Activity {
                       def run(): Unit = {
                         clueLbl.setText(clueMsg.format(state.clue.map(_.getOrElse('_')).mkString))
                         triesLbl.setText(triesMsg.format(state.triesRemaining))
+                        for (i <- 0 to 10) {
+                          triesImg.getPathModelByName(s"lives$i").setStrokeAlpha(if (i >= state.triesRemaining) 1 else 0)
+                        }
+                        triesImg.update()
                       }
                     }
       )

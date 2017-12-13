@@ -36,11 +36,11 @@
       android:layout_marginBottom="8dp"
       />
 
-  <ImageView
+  <com.sdsmdg.harjot.vectormaster.VectorMasterView
       android:id="@+id/hangman_image"
       android:layout_width="0dp"
       android:layout_height="0dp"
-      android:src="@drawable/hangman"
+      app:vector_src="@drawable/hangman"
       app:layout_constraintTop_toBottomOf="@+id/tries_left"
       app:layout_constraintBottom_toTopOf="@+id/try_lbl"
       app:layout_constraintLeft_toLeftOf="parent"
