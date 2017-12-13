@@ -34,7 +34,6 @@ class MainActivity extends Activity {
     super.onCreate(savedInstanceState)
 
     val uri = getIntent.getData
-    println(s"URI: $uri")
     if (uri.getScheme != "hangman") {
       throw new IllegalArgumentException(
         s"URI $uri must use the hangman: scheme")
