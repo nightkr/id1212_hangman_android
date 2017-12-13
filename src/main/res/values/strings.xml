@@ -4,4 +4,7 @@
     <string name="clue_lbl">Word: %s</string>
     <string name="tries_lbl">Remaining tries: %d</string>
     <string name="try_lbl">Try a letter:</string>
+    <string name="won_lbl">You are a WINRAR</string>
+    <string name="lost_lbl">You have lost :(</string>
+    <string name="new_game">New Game</string>
 </resources>

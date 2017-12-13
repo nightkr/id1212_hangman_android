@@ -26,6 +26,10 @@ class MainActivity extends Activity {
   private var triesLbl: TextView = _
   private var triesImg: VectorMasterView = _
 
+  private var playingViews: Seq[View] = _
+  private var lostViews: Seq[View] = _
+  private var wonViews: Seq[View] = _
+
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
 
@@ -46,11 +50,21 @@ class MainActivity extends Activity {
     clueLbl = vh.clue
     triesLbl = vh.tries_left
     triesImg = vh.hangman_image
+    vh.new_game_btn.setOnClickListener(NewGameListener)
+
+    playingViews = Seq(vh.try_lbl, vh.try_input)
+    lostViews = Seq(vh.lost_lbl)
+    wonViews = Seq(vh.won_lbl)
   }
 
   override def onDestroy(): Unit = {
     clientController.stop()
     super.onDestroy()
+  }
+
+  object NewGameListener extends View.OnClickListener {
+    override def onClick(v: View): Unit =
+      clientController.restart()
   }
 
   object TryListener extends TextWatcher {
@@ -71,9 +85,16 @@ class MainActivity extends Activity {
 
   object UpdateListener extends UpdateListener {
     override def gameOver(win: Boolean): Unit =
-      println(":(")
+      runOnUiThread(new Runnable {
+        def run(): Unit = {
+          (playingViews ++ lostViews ++ wonViews)
+            .foreach(_.setVisibility(View.GONE))
+          (if (win) wonViews else lostViews).foreach(
+            _.setVisibility(View.VISIBLE))
+        }
+      })
 
-    override def gameStateUpdate(state: Packet.GameState): Unit = {
+    override def gameStateUpdate(state: Packet.GameState): Unit =
       runOnUiThread(new Runnable {
         def run(): Unit = {
           clueLbl.setText(
@@ -85,9 +106,10 @@ class MainActivity extends Activity {
               .setStrokeAlpha(if (i >= state.triesRemaining) 1 else 0)
           }
           triesImg.update()
+
+          playingViews.foreach(_.setVisibility(View.VISIBLE))
+          (lostViews ++ wonViews).foreach(_.setVisibility(View.GONE))
         }
       })
-      println(state)
-    }
   }
 }
