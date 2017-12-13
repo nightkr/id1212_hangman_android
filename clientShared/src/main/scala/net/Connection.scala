@@ -11,10 +11,7 @@ class Connection(packetListener: Packet => Unit) {
 
   def start(host: String, port: String): Unit = {
     stop()
-    val socket = SocketChannel.open()
-    socket.connect(new InetSocketAddress(host, port.toInt))
-    socket.configureBlocking(false)
-    val t = new ConnectionThread(socket, packetListener)
+    val t = new ConnectionThread(host, port.toInt, packetListener)
     t.start()
     thread = Some(t)
   }
@@ -31,31 +28,44 @@ class Connection(packetListener: Packet => Unit) {
   }
 }
 
-class ConnectionThread(socket: SocketChannel, listener: Packet => Unit) extends Thread {
+class ConnectionThread(host: String, port: Int, listener: Packet => Unit) extends Thread {
   setDaemon(true)
 
   private val selector = Selector.open()
-  private val socketKey = socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE)
+  private var socketKey: Option[SelectionKey] = None // socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE)
 
-  private val reader = new AsyncPacketReader(socket)
-  private val writer = new AsyncPacketWriter(socket)
+  private var writer: Option[AsyncPacketWriter] = None // new AsyncPacketWriter(socket)
 
   override def run(): Unit = {
-    while (selector.isOpen()) {
-      selector.select()
-      for (key <- selector.selectedKeys().asScala) {
-        selector.selectedKeys().remove(key)
-        if (key.isReadable()) {
-          read()
-        }
-        if (key.isWritable()) {
-          flush()
+    val socket = SocketChannel.open()
+    socket.connect(new InetSocketAddress(host, port))
+    socket.configureBlocking(false)
+
+    socketKey = Some(socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE))
+    val reader = new AsyncPacketReader(socket)
+    writer = Some(new AsyncPacketWriter(socket))
+
+    try {
+      while (selector.isOpen()) {
+        selector.select()
+        if (selector.isOpen()) {
+          for (key <- selector.selectedKeys().asScala) {
+            if (key.isReadable()) {
+              read(reader)
+            }
+            if (key.isWritable()) {
+              flush()
+            }
+          }
+          selector.selectedKeys().clear()
         }
       }
+    } finally {
+      socket.close()
     }
   }
 
-  def read(): Unit = {
+  def read(reader: AsyncPacketReader): Unit = {
     try {
       var hasMore = true
       while(hasMore) {
@@ -74,24 +84,22 @@ class ConnectionThread(socket: SocketChannel, listener: Packet => Unit) extends 
   }
 
   def write(packet: Packet): Unit = {
-    writer.synchronized {
-      writer.write(packet)
-      socketKey.interestOps(socketKey.interestOps() | SelectionKey.OP_WRITE)
+    writer.get.synchronized {
+      writer.get.write(packet)
+      socketKey.get.interestOps(socketKey.get.interestOps() | SelectionKey.OP_WRITE)
+      selector.wakeup()
     }
   }
 
   def flush(): Unit = {
-    writer.synchronized {
-      if (!writer.flush()) {
-        socketKey.interestOps(socketKey.interestOps() & ~SelectionKey.OP_WRITE)
+    writer.get.synchronized {
+      if (!writer.get.flush()) {
+        socketKey.get.interestOps(socketKey.get.interestOps() & ~SelectionKey.OP_WRITE)
       }
     }
   }
 
   def close(): Unit = {
-    for (key <- selector.keys().asScala) {
-      key.channel().close()
-    }
     selector.close()
   }
 }

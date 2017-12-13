@@ -49,7 +49,6 @@ class AsyncPacketWriter(channel: WritableByteChannel) {
         buf.position(pos) // Discard half-written packet
         throw ex
     }
-    flush()
   }
 
   def flush(): Boolean = {

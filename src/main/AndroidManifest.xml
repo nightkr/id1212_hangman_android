@@ -3,7 +3,7 @@
       package="se.nullable.kth.id1212.hangman.android.view">
     <application android:label="@string/app_name"
                  android:icon="@drawable/scala_android">
-        <activity android:name="MainActivity"
+        <activity android:name="ConnectActivity"
                   android:theme="@android:style/Theme.Material.Light"
                   android:label="@string/app_name">
             <intent-filter>
@@ -11,5 +11,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="MainActivity"
+                  android:theme="@android:style/Theme.Material.Light"
+                  android:label="@string/app_name"/>
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
