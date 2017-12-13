@@ -76,7 +76,9 @@ class PacketReader(stream: InputStream) {
           val triesLeft = readInt(frame)
           val triedChars = readString(frame)
           val clue = readString(frame)
-          Packet.GameState(triesLeft, triedChars.toSet, clue.map(Some(_).filter(_ != '\u0000')))
+          Packet.GameState(triesLeft,
+                           triedChars.toSet,
+                           clue.map(Some(_).filter(_ != '\u0000')))
         case Packet.Types.GAME_OVER =>
           val win = readBoolean(frame)
           Packet.GameOver(win)
@@ -90,7 +92,8 @@ class PacketReader(stream: InputStream) {
       }
     } catch {
       case e: Exception =>
-        throw new InvalidPacketException(s"Failed to parse packet type: $typeCode")
+        throw new InvalidPacketException(
+          s"Failed to parse packet type: $typeCode")
     }
   }
 }

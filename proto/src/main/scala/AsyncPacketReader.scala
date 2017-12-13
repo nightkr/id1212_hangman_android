@@ -26,7 +26,8 @@ class AsyncPacketReader(channel: ReadableByteChannel) {
     new String(strBuf)
   }
 
-  private def hasReadFrame: Boolean = buf.position() >= 4 && buf.position() >= buf.getInt(0) + 4
+  private def hasReadFrame: Boolean =
+    buf.position() >= 4 && buf.position() >= buf.getInt(0) + 4
 
   private def readFrame(): Option[Int] = {
     if (!hasReadFrame) {
@@ -35,7 +36,8 @@ class AsyncPacketReader(channel: ReadableByteChannel) {
       }
     }
     if (buf.position() >= 4 && buf.getInt(0) >= buf.capacity()) {
-      throw new InvalidPacketException(s"Frame is too long: ${buf.getInt(0)} > ${buf.capacity() - 4}")
+      throw new InvalidPacketException(
+        s"Frame is too long: ${buf.getInt(0)} > ${buf.capacity() - 4}")
     }
     if (hasReadFrame) {
       buf.flip()
@@ -51,11 +53,12 @@ class AsyncPacketReader(channel: ReadableByteChannel) {
     buf.position(length) // Avoid corrupting future reads
     buf.compact()
     if (read != length) {
-      throw new InvalidPacketException(s"Read $read bytes from frame of length $length")
+      throw new InvalidPacketException(
+        s"Read $read bytes from frame of length $length")
     }
   }
 
-  def readNext(): Option[Packet] = {
+  def readNext(): Option[Packet] =
     readFrame().map { length =>
       val tryTypeCode = Try(buf.getInt())
       try {
@@ -68,7 +71,9 @@ class AsyncPacketReader(channel: ReadableByteChannel) {
             val triesLeft = buf.getInt()
             val triedChars = readString()
             val clue = readString()
-            Packet.GameState(triesLeft, triedChars.toSet, clue.map(Some(_).filter(_ != '\u0000')))
+            Packet.GameState(triesLeft,
+                             triedChars.toSet,
+                             clue.map(Some(_).filter(_ != '\u0000')))
           case Packet.Types.GAME_OVER =>
             val win = readBoolean()
             Packet.GameOver(win)
@@ -82,10 +87,10 @@ class AsyncPacketReader(channel: ReadableByteChannel) {
         }
       } catch {
         case e: Exception =>
-          throw new InvalidPacketException(s"Failed to parse packet type: $tryTypeCode")
+          throw new InvalidPacketException(
+            s"Failed to parse packet type: $tryTypeCode")
       } finally {
         doneReadingFrame(length)
       }
     }
-  }
 }

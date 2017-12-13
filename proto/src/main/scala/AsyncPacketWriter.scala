@@ -1,20 +1,17 @@
 package se.nullable.kth.id1212.hangman.proto
 
-import java.io.{ ByteArrayOutputStream, OutputStream }
+import java.io.{ByteArrayOutputStream, OutputStream}
 import java.nio.ByteBuffer
 import java.nio.channels.WritableByteChannel
-
 
 class AsyncPacketWriter(channel: WritableByteChannel) {
   private val buf = ByteBuffer.allocate(5000)
 
-  private def writeBoolean(value: Boolean): Unit = {
+  private def writeBoolean(value: Boolean): Unit =
     buf.put((if (value) 1 else 0): Byte)
-  }
 
-  private def writeChar(value: Char): Unit = {
+  private def writeChar(value: Char): Unit =
     buf.put(value.toByte)
-  }
 
   private def writeString(value: Seq[Char]): Unit = {
     buf.putInt(value.length)

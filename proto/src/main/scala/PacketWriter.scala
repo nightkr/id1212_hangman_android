@@ -1,7 +1,6 @@
 package se.nullable.kth.id1212.hangman.proto
 
-import java.io.{ ByteArrayOutputStream, OutputStream }
-
+import java.io.{ByteArrayOutputStream, OutputStream}
 
 class PacketWriter(stream: OutputStream) {
   private def writeInt(os: OutputStream, value: Int): Unit = {

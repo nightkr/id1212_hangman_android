@@ -11,17 +11,14 @@ class ClientController {
 
   private val log = LoggerFactory.getLogger(getClass)
 
-  def addListener(listener: UpdateListener): Unit = {
+  def addListener(listener: UpdateListener): Unit =
     listeners += listener
-  }
 
-  def start(host: String, port: String): Unit = {
+  def start(host: String, port: String): Unit =
     connection.start(host, port)
-  }
 
-  def stop(): Unit = {
+  def stop(): Unit =
     connection.stop()
-  }
 
   private def receivePacket(packet: Packet): Unit = packet match {
     case pkt: Packet.GameState =>
@@ -32,17 +29,14 @@ class ClientController {
       log.error(s"Invalid packet: $pkt")
   }
 
-  def tryLetter(letter: Char): Unit = {
+  def tryLetter(letter: Char): Unit =
     connection.sendPacket(Packet.TryLetter(letter))
-  }
 
-  def tryWord(word: String): Unit = {
+  def tryWord(word: String): Unit =
     connection.sendPacket(Packet.TryWord(word))
-  }
 
-  def restart(): Unit = {
+  def restart(): Unit =
     connection.sendPacket(Packet.Restart)
-  }
 }
 
 trait UpdateListener {

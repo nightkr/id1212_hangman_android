@@ -39,6 +39,8 @@ resolvers += Resolver.jcenterRepo
 
 lazy val proto = project.settings(sharedSettings: _*)
 lazy val clientShared = project.settings(sharedSettings: _*).dependsOn(proto)
-lazy val hangmanAndroid = project.in(file(".")).settings(sharedSettings: _*)
+lazy val hangmanAndroid = project
+  .in(file("."))
+  .settings(sharedSettings: _*)
   .dependsOn(clientShared)
   .aggregate(proto, clientShared)

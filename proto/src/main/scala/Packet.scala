@@ -13,10 +13,14 @@ object Packet {
   }
 
   case class TryLetter(letter: Char) extends Packet
-  case class GameState(triesRemaining: Int, triedLetters: Set[Char], clue: Seq[Option[Char]]) extends Packet
+  case class GameState(triesRemaining: Int,
+                       triedLetters: Set[Char],
+                       clue: Seq[Option[Char]])
+      extends Packet
   case class GameOver(win: Boolean) extends Packet
   case class TryWord(word: String) extends Packet
   case object Restart extends Packet
 }
 
-class InvalidPacketException(msg: String, cause: Throwable = null) extends IOException(msg, cause)
+class InvalidPacketException(msg: String, cause: Throwable = null)
+    extends IOException(msg, cause)

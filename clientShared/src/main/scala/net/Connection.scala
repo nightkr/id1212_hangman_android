@@ -1,10 +1,19 @@
 package se.nullable.kth.id1212.hangman.client.net
 
 import java.net.InetSocketAddress
-import java.nio.channels.{ ClosedChannelException, SelectionKey, Selector, SocketChannel }
+import java.nio.channels.{
+  ClosedChannelException,
+  SelectionKey,
+  Selector,
+  SocketChannel
+}
 
 import scala.collection.JavaConverters._
-import se.nullable.kth.id1212.hangman.proto.{AsyncPacketReader, AsyncPacketWriter, Packet}
+import se.nullable.kth.id1212.hangman.proto.{
+  AsyncPacketReader,
+  AsyncPacketWriter,
+  Packet
+}
 
 class Connection(packetListener: Packet => Unit) {
   private var thread: Option[ConnectionThread] = None
@@ -16,32 +25,34 @@ class Connection(packetListener: Packet => Unit) {
     thread = Some(t)
   }
 
-  def stop(): Unit = {
+  def stop(): Unit =
     thread.foreach { t =>
       t.close()
       t.join()
     }
-  }
 
-  def sendPacket(packet: Packet): Unit = {
+  def sendPacket(packet: Packet): Unit =
     thread.get.write(packet)
-  }
 }
 
-class ConnectionThread(host: String, port: Int, listener: Packet => Unit) extends Thread {
+class ConnectionThread(host: String, port: Int, listener: Packet => Unit)
+    extends Thread {
   setDaemon(true)
 
   private val selector = Selector.open()
-  private var socketKey: Option[SelectionKey] = None // socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE)
+  private var socketKey
+    : Option[SelectionKey] = None // socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE)
 
-  private var writer: Option[AsyncPacketWriter] = None // new AsyncPacketWriter(socket)
+  private var writer
+    : Option[AsyncPacketWriter] = None // new AsyncPacketWriter(socket)
 
   override def run(): Unit = {
     val socket = SocketChannel.open()
     socket.connect(new InetSocketAddress(host, port))
     socket.configureBlocking(false)
 
-    socketKey = Some(socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE))
+    socketKey = Some(
+      socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE))
     val reader = new AsyncPacketReader(socket)
     writer = Some(new AsyncPacketWriter(socket))
 
@@ -65,10 +76,10 @@ class ConnectionThread(host: String, port: Int, listener: Packet => Unit) extend
     }
   }
 
-  def read(reader: AsyncPacketReader): Unit = {
+  def read(reader: AsyncPacketReader): Unit =
     try {
       var hasMore = true
-      while(hasMore) {
+      while (hasMore) {
         reader.readNext() match {
           case Some(packet) =>
             listener(packet)
@@ -81,25 +92,23 @@ class ConnectionThread(host: String, port: Int, listener: Packet => Unit) extend
         // Game over, terminate loop
         close()
     }
-  }
 
-  def write(packet: Packet): Unit = {
+  def write(packet: Packet): Unit =
     writer.get.synchronized {
       writer.get.write(packet)
-      socketKey.get.interestOps(socketKey.get.interestOps() | SelectionKey.OP_WRITE)
+      socketKey.get.interestOps(
+        socketKey.get.interestOps() | SelectionKey.OP_WRITE)
       selector.wakeup()
     }
-  }
 
-  def flush(): Unit = {
+  def flush(): Unit =
     writer.get.synchronized {
       if (!writer.get.flush()) {
-        socketKey.get.interestOps(socketKey.get.interestOps() & ~SelectionKey.OP_WRITE)
+        socketKey.get.interestOps(
+          socketKey.get.interestOps() & ~SelectionKey.OP_WRITE)
       }
     }
-  }
 
-  def close(): Unit = {
+  def close(): Unit =
     selector.close()
-  }
 }

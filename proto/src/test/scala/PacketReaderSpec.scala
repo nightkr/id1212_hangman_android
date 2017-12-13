@@ -2,14 +2,15 @@ package se.nullable.kth.id1212.hangman.proto
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, EOFException}
 import java.nio.ByteBuffer
-import java.nio.channels.{ ClosedChannelException, Pipe }
+import java.nio.channels.{ClosedChannelException, Pipe}
 
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatest.prop.PropertyChecks
 
 class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
-  private def seqReader(bytes: Byte*): PacketReader = new PacketReader(new ByteArrayInputStream(bytes.toArray))
+  private def seqReader(bytes: Byte*): PacketReader =
+    new PacketReader(new ByteArrayInputStream(bytes.toArray))
 
   "A PacketReader given an InputStream" when {
     "empty" should {
@@ -23,7 +24,7 @@ class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
       "throw an InvalidPacketException" in {
         val reader = seqReader(
           0, 0, 0, 4, // Packet length
-          0, 0, 0, 0  // Type 0 (reserved invalid)
+          0, 0, 0, 0 // Type 0 (reserved invalid)
         )
         assertThrows[InvalidPacketException](reader.readNext())
       }
@@ -32,8 +33,14 @@ class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
     "reading a TryLetter packet" should {
       "decode the packet" in {
         val reader = seqReader(
-          0, 0, 0, 5, // Packet length
-          0, 0, 0, 1, // Type 1 (TryLetter)
+          0,
+          0,
+          0,
+          5, // Packet length
+          0,
+          0,
+          0,
+          1, // Type 1 (TryLetter)
           'c'.toByte
         )
         reader.readNext() shouldEqual Packet.TryLetter('c')
@@ -43,15 +50,38 @@ class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
     "reading a GameState packet" should {
       "decode the packet" in {
         val reader = seqReader(
-          0, 0, 0, 24, // Packet length
-          0, 0, 0, 2,  // Type 2 (GameState)
-          0, 0, 0, 5,  // Remaining tries
-          0, 0, 0, 2,  // Tried character count
-          'g'.toByte, 'h'.toByte,
-          0, 0, 0, 6,  // Clue length
-          'q'.toByte, 'w'.toByte, 'e'.toByte, 'r'.toByte, 't'.toByte, 'y'.toByte
+          0,
+          0,
+          0,
+          24, // Packet length
+          0,
+          0,
+          0,
+          2, // Type 2 (GameState)
+          0,
+          0,
+          0,
+          5, // Remaining tries
+          0,
+          0,
+          0,
+          2, // Tried character count
+          'g'.toByte,
+          'h'.toByte,
+          0,
+          0,
+          0,
+          6, // Clue length
+          'q'.toByte,
+          'w'.toByte,
+          'e'.toByte,
+          'r'.toByte,
+          't'.toByte,
+          'y'.toByte
         )
-        reader.readNext() shouldEqual Packet.GameState(5, Set('g', 'h'), "qwerty".map(Some(_)))
+        reader.readNext() shouldEqual Packet.GameState(5,
+                                                       Set('g', 'h'),
+                                                       "qwerty".map(Some(_)))
       }
     }
   }
@@ -72,7 +102,12 @@ class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
   } yield Packet.TryWord(word)
   val gamePacketRestart: Gen[Packet.Restart.type] = Gen.const(Packet.Restart)
 
-  implicit val genPacket: Arbitrary[Packet] = Arbitrary(Gen.oneOf(genPacketTryLetter, genPacketGameState, genPacketGameOver, gamePacketTryWord, gamePacketRestart))
+  implicit val genPacket: Arbitrary[Packet] = Arbitrary(
+    Gen.oneOf(genPacketTryLetter,
+              genPacketGameState,
+              genPacketGameOver,
+              gamePacketTryWord,
+              gamePacketRestart))
 
   "A PacketReader" when {
     "given a value serialized by PacketWriter" should {
@@ -81,7 +116,8 @@ class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
           val bos = new ByteArrayOutputStream
           val writer = new PacketWriter(bos)
           writer.write(packet)
-          val reader = new PacketReader(new ByteArrayInputStream(bos.toByteArray()))
+          val reader =
+            new PacketReader(new ByteArrayInputStream(bos.toByteArray()))
           val readPkt = reader.readNext()
           readPkt shouldEqual packet
         }
@@ -108,8 +144,14 @@ class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
     "given a partial packet" should {
       "give back None until the full value is available" in {
         val packet = Seq[Byte](
-          0, 0, 0, 5, // Packet length
-          0, 0, 0, 1, // Type 1 (TryLetter)
+          0,
+          0,
+          0,
+          5, // Packet length
+          0,
+          0,
+          0,
+          1, // Type 1 (TryLetter)
           'c'.toByte
         )
         val pipe = Pipe.open()
@@ -126,11 +168,22 @@ class PacketReaderSpec extends WordSpec with Matchers with PropertyChecks {
     "given multiple packets" should {
       "give back one at a time" in {
         val packets = 5
-        val packet = ByteBuffer.wrap((0 to packets).flatMap(_ => Seq[Byte](
-          0, 0, 0, 5, // Packet length
-          0, 0, 0, 1, // Type 1 (TryLetter)
-          'c'.toByte
-        )).toArray)
+        val packet = ByteBuffer.wrap(
+          (0 to packets)
+            .flatMap(
+              _ =>
+                Seq[Byte](
+                  0,
+                  0,
+                  0,
+                  5, // Packet length
+                  0,
+                  0,
+                  0,
+                  1, // Type 1 (TryLetter)
+                  'c'.toByte
+              ))
+            .toArray)
         val pipe = Pipe.open()
         pipe.source.configureBlocking(false)
         pipe.sink().write(packet)

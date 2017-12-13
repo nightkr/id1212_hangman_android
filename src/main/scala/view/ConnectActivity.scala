@@ -12,7 +12,11 @@ class ConnectActivity extends Activity {
     super.onCreate(savedInstanceState)
 
     val intent = new Intent(this, classOf[MainActivity])
-    intent.setData(new Uri.Builder().scheme("hangman").encodedAuthority("192.168.1.14:2729").build())
+    intent.setData(
+      new Uri.Builder()
+        .scheme("hangman")
+        .encodedAuthority("192.168.1.14:2729")
+        .build())
     startActivity(intent)
     finish()
   }
